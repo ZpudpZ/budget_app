@@ -1,0 +1,11 @@
+# Ignorar entorno virtual
+venv/
+env/
+__pycache__/
+*.pyc
+
+# Ignorar archivos de sistema
+.DS_Store
+
+# Ignorar datos sensible
+# data/
