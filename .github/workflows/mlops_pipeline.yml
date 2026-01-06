@@ -1,0 +1,44 @@
+name: MLOps Budget Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Descargar tu código en la máquina virtual de GitHub
+    - name: Checkout del código
+      uses: actions/checkout@v4
+
+    # Instalar Python
+    - name: Configurar Python 3.9
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.9"
+
+    # Instalar librerías
+    - name: Instalar dependencias
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest
+
+    # Correr las pruebas (Si fallan, se detiene todo)
+    - name: Ejecutar Pruebas (QA)
+      run: |
+        pytest
+
+    # Entrenar el modelo (Mantenimiento Automático)
+    - name: Re-Entrenamiento del Modelo
+      run: |
+        python training/train.py
+
+    # Mostrar que los archivos se crearon
+    - name: Verificar Modelos Generados
+      run: |
+        ls -l model/
