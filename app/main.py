@@ -2,60 +2,55 @@ import streamlit as st
 import sys
 import os
 
+# Configurar rutas para importaciones
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from styles import load_css
-from model_loader import load_models
+from model_loader import load_models, predict_cluster 
 from views.analisis import show_analysis_view
 
-# Configuración Inicial
+# Configuración de la Página
 st.set_page_config(
-    page_title="Budget Intelligence Dashboard",
-    page_icon="💰",
+    page_title="Budget Intelligence",
+    page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Cargar estilos CSS
+# Cargar Estilos y Modelos
 load_css()
-
-# Cargar Modelos (Backend)
 kmeans, scaler, model_loaded = load_models()
 
-# Sidebar de Navegación
+# SIDEBAR
 with st.sidebar:
-    st.markdown("### Navegación")
-    page = st.radio(
-        "Ir a:", 
-        ["Análisis", "Reportes", "Historial", "Ayuda", "Configuración"],
-        label_visibility="collapsed"
-    )
+    st.title("Navegación")
+    opcion = st.radio("Ir a:", ["Análisis", "Reportes", "Configuración"])
     
     st.markdown("---")
-    st.markdown("### Estado del Sistema")
+    st.caption("Estado del Sistema")
     if model_loaded:
-        st.success("✅ IA Activa")
+        st.success("✅ IA Activa (K-Means)")
     else:
         st.warning("⚠️ Modo Simulación")
         
-    st.markdown("---")
-    st.info("**Budget Intelligence**\n\nSistema de análisis presupuestal con IA para el sector público peruano.")
+    st.info("Sistema de Análisis Presupuestal v1.0")
 
-# Header Principal
+# HEADER
 st.markdown("""
 <div class="main-header">
     <h1 class="main-title">Budget Intelligence Dashboard</h1>
-    <p class="subtitle">Análisis Presupuestal Inteligente - Perú</p>
+    <p class="subtitle">Análisis Fiscal con Inteligencia Artificial</p>
 </div>
 """, unsafe_allow_html=True)
 
-# Enrutador de Páginas
-if page == "Análisis":
-    show_analysis_view(kmeans, scaler, model_loaded)
+# RUTAS
+if opcion == "Análisis":
+    show_analysis_view(kmeans, scaler, model_loaded, predict_cluster)
 
-elif page == "Reportes":
-    st.title("Generación de Reportes")
-    st.info("🚧 Módulo en construcción. Aquí podrás exportar PDFs con tus análisis.")
+elif opcion == "Reportes":
+    st.title("📂 Reportes Automatizados")
+    st.info("Generación de PDFs para auditoría (En construcción por equipo MLOps).")
 
 else:
-    st.info(f"Has seleccionado la página: {page}")
+    st.title("⚙️ Configuración")
+    st.write("Parámetros del modelo y conexión a base de datos.")

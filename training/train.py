@@ -15,9 +15,7 @@ def load_and_process_data():
     try:
         gastos_path = os.path.join(DATA_PATH, 'gastos.csv')
         ingresos_path = os.path.join(DATA_PATH, 'ingresos.csv')
-        
-        # CAMBIO 1: Usamos sep=';' explícitamente porque tus archivos lo usan
-        # encoding='latin-1' es típico en data del estado peruano (MEF)
+
         df_gastos = pd.read_csv(gastos_path, sep=';', encoding='latin-1', dtype=str)
         df_ingresos = pd.read_csv(ingresos_path, sep=';', encoding='latin-1', dtype=str)
         
@@ -31,9 +29,9 @@ def load_and_process_data():
     df_gastos.columns = df_gastos.columns.str.lower().str.strip()
     df_ingresos.columns = df_ingresos.columns.str.lower().str.strip()
 
-    # --- PROCESAMIENTO DE GASTOS ---
+    # Procesamiento de gastos
     print("[INFO] Procesando Gastos...")
-    cols_gastos = ['pim', 'devengado', 'saldo', 'sec_ejec'] # Usamos sec_ejec para agrupar
+    cols_gastos = ['pim', 'devengado', 'saldo', 'sec_ejec']
     
     # Verificar columnas existentes
     actual_cols_g = [c for c in cols_gastos if c in df_gastos.columns]
@@ -45,17 +43,15 @@ def load_and_process_data():
             df_g[col] = df_g[col].str.replace(',', '', regex=False)
             df_g[col] = pd.to_numeric(df_g[col], errors='coerce').fillna(0)
 
-    # Agrupar por UNIDAD EJECUTORA (sec_ejec) para tener un resumen por entidad
-    # Nota: Si tus archivos tienen varios años mezclados, esto los sumará todos.
     df_g_grouped = df_g.groupby('sec_ejec')[['pim', 'devengado', 'saldo']].sum().reset_index()
     
     # Ratios
     df_g_grouped['gastos'] = np.where(df_g_grouped['pim'] > 0, df_g_grouped['devengado'] / df_g_grouped['pim'], 0)
     df_g_grouped['ratio_saldo'] = np.where(df_g_grouped['devengado'] > 0, df_g_grouped['saldo'] / df_g_grouped['devengado'], 0)
 
-    # --- PROCESAMIENTO DE INGRESOS ---
+    # Procesamiento de ingresos
     print("[INFO] Procesando Ingresos...")
-    cols_ingresos = ['pim', 'total_prog', 'sec_ejec'] # total_prog suele ser la recaudación
+    cols_ingresos = ['pim', 'total_prog', 'sec_ejec']
     
     actual_cols_i = [c for c in cols_ingresos if c in df_ingresos.columns]
     df_i = df_ingresos[actual_cols_i].copy()
@@ -71,9 +67,8 @@ def load_and_process_data():
     # Ratios
     df_i_grouped['ingresos'] = np.where(df_i_grouped['pim_ingresos'] > 0, df_i_grouped['recaudado'] / df_i_grouped['pim_ingresos'], 0)
 
-    # --- UNIÓN (MERGE) ---
+    # Union (Merge)
     print("[INFO] Uniendo tablas por Unidad Ejecutora (sec_ejec)...")
-    # CAMBIO 2: Unimos por 'sec_ejec' ya que es el código común (301280) en ambos archivos
     df_final = pd.merge(df_g_grouped, df_i_grouped, on='sec_ejec', how='inner')
     
     # Ratio Final
@@ -89,23 +84,22 @@ def train():
     print("--- INICIANDO ENTRENAMIENTO ---")
     df = load_and_process_data()
     
-    # CAMBIO 3: Validación mínima relajada (si hay 1 fila, la duplicamos para que k-means corra)
+    # Validación mínima relajada (si hay 1 fila, la duplicamos para que k-means corra)
     if df.empty:
         print("[ERROR] No hay coincidencias entre Gastos e Ingresos (verifica los códigos sec_ejec).")
         return
 
-    # Truco para que funcione con pocos datos
     if len(df) < 5:
         print("[WARN] Pocos datos. Duplicando filas para fines academicos (clustering)...")
         df = pd.concat([df]*5, ignore_index=True)
-        # Añadimos ruido mínimo para que no sean puntos idénticos
+        # Ruido mínimo para que no sean puntos idénticos
         noise = np.random.normal(0, 0.01, df.shape)
         df = df + noise
 
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(df)
     
-    n_clusters = 5 # Forzamos 5 clusters como pide tu PDF
+    n_clusters = 5
     kmeans = KMeans(n_clusters=n_clusters, random_state=42, n_init=10)
     kmeans.fit(X_scaled)
     
