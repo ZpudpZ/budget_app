@@ -69,31 +69,57 @@ def show_analysis_view(kmeans, scaler, model_loaded, predict_function):
             data = [ingresos, gastos, ratio_gi, ratio_saldo]
             cluster_id, perfil = predict_function(kmeans, scaler, model_loaded, data)
 
+            import datetime
+            nuevo_registro = {
+                'Timestamp': datetime.datetime.now().strftime("%H:%M:%S"),
+                'Ingresos': f"{ingresos*100:.0f}%",
+                'Gastos': f"{gastos*100:.0f}%",
+                'Ratio G/I': ratio_gi,
+                'Ratio S/G': ratio_saldo,
+                'Cluster': cluster_id,
+                'Estado': perfil['status']
+            }
+
+            st.session_state['ultimo_analisis'] = {
+                'ingresos': ingresos,
+                'gastos': gastos,
+                'ratio_gi': ratio_gi,
+                'ratio_saldo': ratio_saldo,
+                'cluster': cluster_id,
+                'perfil': perfil
+            }
+
+            if 'historial_sesion' not in st.session_state:
+                st.session_state['historial_sesion'] = []
+
+            st.session_state['historial_sesion'].insert(0, nuevo_registro)
+
             html_code = f"""
-<div class="result-card cluster-{cluster_id}" style="color: white; border-radius: 15px; padding: 25px; margin-top: 20px;">
-<div style="display: flex; justify-content: space-between; align-items: start;">
-<div>
-<p style="margin: 0; opacity: 0.8; font-size: 0.9rem;">Estado Fiscal</p>
-<h2 style="margin: 5px 0; font-size: 2.2rem;">{perfil['icono']} {perfil['status']}</h2>
-</div>
-<div class="status-badge">Cluster {cluster_id}</div>
-</div>
-<h3 style="margin-top: 20px;">{perfil['titulo']}</h3>
-<p style="font-size: 1.1rem; opacity: 0.95;">{perfil['descripcion']}</p>
-<hr style="border-color: rgba(255,255,255,0.2); margin: 20px 0;">
-<div style="display: flex; gap: 15px;">
-<div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; flex: 1; text-align: center;">
-<small>Ingresos</small><br>
-<strong style="font-size: 1.4rem;">{ingresos*100:.0f}%</strong>
-</div>
-<div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; flex: 1; text-align: center;">
-<small>Gastos</small><br>
-<strong style="font-size: 1.4rem;">{gastos*100:.0f}%</strong>
-</div>
-</div>
-</div>
-"""
+            <div class="result-card cluster-{cluster_id}" style="color: white; border-radius: 15px; padding: 25px; margin-top: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: start;">
+            <div>
+            <p style="margin: 0; opacity: 0.8; font-size: 0.9rem;">Estado Fiscal</p>
+            <h2 style="margin: 5px 0; font-size: 2.2rem;">{perfil['icono']} {perfil['status']}</h2>
+            </div>
+            <div class="status-badge">Cluster {cluster_id}</div>
+            </div>
+            <h3 style="margin-top: 20px;">{perfil['titulo']}</h3>
+            <p style="font-size: 1.1rem; opacity: 0.95;">{perfil['descripcion']}</p>
+            <hr style="border-color: rgba(255,255,255,0.2); margin: 20px 0;">
+            <div style="display: flex; gap: 15px;">
+            <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; flex: 1; text-align: center;">
+            <small>Ingresos</small><br>
+            <strong style="font-size: 1.4rem;">{ingresos*100:.0f}%</strong>
+            </div>
+            <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; flex: 1; text-align: center;">
+            <small>Gastos</small><br>
+            <strong style="font-size: 1.4rem;">{gastos*100:.0f}%</strong>
+            </div>
+            </div>
+            </div>
+            """
             st.markdown(html_code, unsafe_allow_html=True)
+            st.success("✅ Análisis agregado al historial. Ve a 'Reportes' para verlo.")
 
     # Footer
     st.markdown("<br><br>", unsafe_allow_html=True)

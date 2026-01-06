@@ -2,14 +2,15 @@ import streamlit as st
 import sys
 import os
 
-# Configurar rutas para importaciones
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from styles import load_css
 from model_loader import load_models, predict_cluster 
+# Importamos las nuevas vistas
 from views.analisis import show_analysis_view
+from views.reportes import show_reports_view
+from views.configuracion import show_config_view
 
-# Configuración de la Página
 st.set_page_config(
     page_title="Budget Intelligence",
     page_icon="📊",
@@ -17,11 +18,10 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Cargar Estilos y Modelos
 load_css()
 kmeans, scaler, model_loaded = load_models()
 
-# SIDEBAR
+# --- SIDEBAR ---
 with st.sidebar:
     st.title("Navegación")
     opcion = st.radio("Ir a:", ["Análisis", "Reportes", "Configuración"])
@@ -32,10 +32,8 @@ with st.sidebar:
         st.success("✅ IA Activa (K-Means)")
     else:
         st.warning("⚠️ Modo Simulación")
-        
-    st.info("Sistema de Análisis Presupuestal v1.0")
 
-# HEADER
+# --- HEADER ---
 st.markdown("""
 <div class="main-header">
     <h1 class="main-title">Budget Intelligence Dashboard</h1>
@@ -43,14 +41,14 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# RUTAS
+# --- ENRUTAMIENTO ---
 if opcion == "Análisis":
     show_analysis_view(kmeans, scaler, model_loaded, predict_cluster)
 
 elif opcion == "Reportes":
-    st.title("📂 Reportes Automatizados")
-    st.info("Generación de PDFs para auditoría (En construcción por equipo MLOps).")
+    # Llamamos a la nueva vista de reportes
+    show_reports_view()
 
-else:
-    st.title("⚙️ Configuración")
-    st.write("Parámetros del modelo y conexión a base de datos.")
+elif opcion == "Configuración":
+    # Llamamos a la nueva vista de configuración
+    show_config_view()
