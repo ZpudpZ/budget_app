@@ -4,7 +4,7 @@ import textwrap
 def show_analysis_view(kmeans, scaler, model_loaded, predict_function):
     
     # Titulo
-    st.markdown("## Evalúa tu Gestión Presupuestal")
+    st.markdown("## ")
     st.markdown("##### Utiliza inteligencia artificial para clasificar y optimizar la ejecución de tu presupuesto público")
     
     # Guia Desplegable
