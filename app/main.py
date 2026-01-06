@@ -52,3 +52,5 @@ elif opcion == "Reportes":
 elif opcion == "Configuración":
     # Llamamos a la nueva vista de configuración
     show_config_view()
+
+# feuture
