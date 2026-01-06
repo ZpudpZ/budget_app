@@ -12,7 +12,7 @@ from views.reportes import show_reports_view
 from views.configuracion import show_config_view
 
 st.set_page_config(
-    page_title="Budget Intelligence",
+    page_title="",
     page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded"
